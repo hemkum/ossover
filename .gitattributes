@@ -1,0 +1,44 @@
+# Line endings: text files are LF in the repository and on every checkout.
+* text=auto eol=lf
+
+*.swift   text eol=lf
+*.sh      text eol=lf
+*.py      text eol=lf
+*.c       text eol=lf
+*.h       text eol=lf
+*.json    text eol=lf
+*.ndjson  text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.txt     text eol=lf
+*.plist   text eol=lf
+*.acf     text eol=lf
+
+# Kept byte for byte: patches must apply exactly; test fixtures are captured
+# verbatim (some are CRLF on purpose, e.g. wine-stderr-hidden.log, user.settings);
+# the vendored winetricks is pinned by SHA-256 and must not be rewritten.
+*.patch                     -text
+*.diff                      -text
+Tests/Fixtures/**           -text
+scripts/vendor/winetricks   -text
+
+# Binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.icns     binary
+*.exe      binary
+*.dll      binary
+*.so       binary
+*.dylib    binary
+*.tar      binary
+*.tar.gz   binary
+*.tar.xz   binary
+*.zip      binary
+*.dmg      binary
+
+# GitHub language statistics and diff rendering
+scripts/vendor/**      linguist-vendored
+docs/rea/evidence/**   linguist-generated

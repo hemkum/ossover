@@ -1,0 +1,45 @@
+{
+  "schema": "ossover.bottle/1",
+  "name": "witcher3",
+  "created": "2026-10-13T12:00:00Z",
+  "engineId": "test-engine",
+  "settings": {
+    "windowsVersion": "win10",
+    "sync": "msync",
+    "renderer": "dxmt",
+    "retina": true,
+    "dpi": 96,
+    "advertiseAVX": true,
+    "metalHUD": false,
+    "metalHUDLog": false,
+    "dlssMetalFX": false,
+    "captureDisplaysForFullscreen": false,
+    "isolateUserFolders": true,
+    "dllOverrides": [],
+    "env": { "ROSETTA_ADVERTISE_AVX": "1" }
+  },
+  "programs": [
+    {
+      "id": "witcher3",
+      "name": "The Witcher 3",
+      "exe": "C:\\Games\\The Witcher 3\\bin\\x64\\witcher3.exe",
+      "args": ["--launcher-skip", "-skipStartScreen"],
+      "workingDir": "C:\\Games\\The Witcher 3\\bin\\x64",
+      "env": {},
+      "launchMode": "direct"
+    }
+  ],
+  "recipesApplied": ["witcher3-4.04-dx11"],
+  "recipeHistory": [
+    { "id": "witcher3-4.04-dx11", "version": "sha256:0123456789ab", "at": "2026-10-13T12:05:00Z" }
+  ],
+  "steam": {
+    "appId": 292030,
+    "branch": "next-gen",
+    "buildId": "11916098",
+    "betaKey": "next-gen",
+    "installDir": "C:\\Games\\The Witcher 3",
+    "fetchedAt": "2026-10-13T11:30:00Z",
+    "account": "steamuser"
+  }
+}

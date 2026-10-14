@@ -1,0 +1,29 @@
+{
+  "schema": "ossover.renderer-pack/1",
+  "id": "dxvk-macos-1.10.3",
+  "kind": "dxvk",
+  "version": "1.10.3",
+  "source": {
+    "url": "https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/dxvk-macOS-async-v1.10.3-20230507-repack-builtin.tar.gz",
+    "sha256": "TBD",
+    "size": 2785833,
+    "license": "Zlib",
+    "extract": { "strip": 1, "into": "wine" }
+  },
+  "builtinMarked": true,
+  "requires": {
+    "macdrvExports": false
+  },
+  "layout": {
+    "unix": [],
+    "pe": ["d3d9.dll", "d3d10core.dll", "d3d11.dll", "dxgi.dll"],
+    "pe32": ["d3d9.dll", "d3d10core.dll", "d3d11.dll", "dxgi.dll"]
+  },
+  "overrides": ["d3d9,d3d10core,d3d11,dxgi=n,b"],
+  "notes": [
+    "Optional renderer (plan §2): DXVK-macOS async 1.10.3 over MoltenVK through winevulkan. Known limits: MoltenVK lacks VK_EXT_transform_feedback, so Witcher 3's sirens/rotfiends/hounds are invisible; use dxmt for that game.",
+    "TODO(REA): sha256 is TBD; RendererStore refuses to install an unpinned source. Pin it on first download and confirm the inner layout with `tar tzf` (expected: <top dir>/x64/*.dll and <top dir>/x32/*.dll, which RendererStore maps onto wine/x86_64-windows and wine/i386-windows). The size comes from the plan's HEAD check.",
+    "TODO(REA): the DLL list (d3d9, d3d10core, d3d11, dxgi) is DXVK 1.10.3's standard set and is unconfirmed for the repack; the frankea engine's bundled copy ships only d3d10core and d3d11. Trim `layout`/`overrides` to what the tarball holds before pinning.",
+    "`-builtin` in the asset name: the DLLs carry Wine's builtin mark, so strategy B strips it before placing them in system32."
+  ]
+}

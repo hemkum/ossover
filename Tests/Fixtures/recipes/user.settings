@@ -1,0 +1,10 @@
+[General]
+Language=en
+
+[Rendering]
+HairWorksLevel=2
+TextureQuality="high"
+
+[Viewport]
+Resolution="1920x1080"
+FullScreenMode=0

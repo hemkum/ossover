@@ -1,0 +1,78 @@
+name: Bug report
+description: ossover itself misbehaves (CLI, engine install, bottle, recipe engine, bench). For "game X does not run", use the compatibility report.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please run the failing command once more with the full output in front of you; most bugs are fixed from the log alone.
+        Never paste Steam credentials. Logs contain your user name in paths; check before attaching.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you run, what did you see, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Command and output
+      description: The full `ossover ...` command and its output, or the file under `logs/` that it names.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: ossover doctor
+      description: Output of `ossover doctor`.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: ossover version
+      description: "`ossover --version`, plus the git commit if you built from source."
+      placeholder: "0.1.0 (6b9cc4c)"
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Engine id
+      description: "From `ossover engine list`. Leave blank if no engine is involved."
+      placeholder: x64-frankea-wine11.16-cx26.3-v4.6.4b1
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "26.7.1"
+    validations:
+      required: true
+  - type: input
+    id: chip
+    attributes:
+      label: Mac, chip and RAM
+      placeholder: "MacBook Pro, Apple M5 Pro, 24 GB"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues.
+          required: true
+        - label: The output above contains no Steam credentials, tokens or other secrets.
+          required: true

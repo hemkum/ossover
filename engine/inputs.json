@@ -1,0 +1,86 @@
+{
+  "schema": "ossover-engine-inputs/1",
+  "engineId": "x64-ossover-cx26.3-r1",
+  "notes": "All sha256 values were computed locally on 2026-10-13 from the downloaded files; sizes are from HTTP Content-Length. 'TBD' entries are pinned on first download by engine/build.sh (it refuses to proceed unless --pin is passed).",
+  "inputs": {
+    "crossover-sources": {
+      "url": "https://media.codeweavers.com/pub/crossover/source/crossover-sources-26.3.0.tar.gz",
+      "sha256": "ac99c8ca4b3848f3e81784135f023df266b61c2345726ea55a50b3e030dd6872",
+      "size": 149054023,
+      "license": "LGPL-2.1-or-later (wine), see sources/*/LICENSE",
+      "subdir": "sources/wine"
+    },
+    "dxmt": {
+      "url": "https://github.com/3Shain/dxmt/releases/download/v0.80/dxmt-v0.80-builtin.tar.gz",
+      "sha256": "8f260e36b5739e68f3bad613381441385c4dc7b85b78ba8de653d5a6a264529d",
+      "size": 18681669,
+      "license": "MIT (v0.80; later releases LGPL-2.1-or-later)"
+    },
+    "moltenvk": {
+      "url": "https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar",
+      "sha256": "f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e",
+      "size": 59563008,
+      "license": "Apache-2.0",
+      "dylib": "MoltenVK/MoltenVK/dynamic/dylib/macOS/libMoltenVK.dylib"
+    },
+    "dxvk-macos": {
+      "url": "https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/dxvk-macOS-async-v1.10.3-20230507-repack-builtin.tar.gz",
+      "sha256": "810b1e5caf8ce975b784fae866a130ad23fa0ea233b0e5609cbc4a45f3ef6f00",
+      "size": 2785833,
+      "license": "zlib",
+      "optional": true
+    },
+    "wine-mono": {
+      "url": "https://dl.winehq.org/wine/wine-mono/10.4.1/wine-mono-10.4.1-x86.tar.xz",
+      "sha256": "a16606ef0724202e6a6848ece6e0cbba64d11e2f11aefe744af1d93c6d9f99bb",
+      "size": 39590692,
+      "license": "mixed (see wine-mono LICENSE)"
+    },
+    "wine-gecko-x86": {
+      "url": "https://dl.winehq.org/wine/wine-gecko/2.47.4/wine-gecko-2.47.4-x86.tar.xz",
+      "sha256": "2cfc8d5c948602e21eff8a78613e1826f2d033df9672cace87fed56e8310afb6",
+      "size": 43025064,
+      "license": "MPL-2.0"
+    },
+    "wine-gecko-x86_64": {
+      "url": "https://dl.winehq.org/wine/wine-gecko/2.47.4/wine-gecko-2.47.4-x86_64.tar.xz",
+      "sha256": "fd88fc7e537d058d7a8abf0c1ebc90c574892a466de86706a26d254710a82814",
+      "size": 41935496,
+      "license": "MPL-2.0"
+    }
+  },
+  "toolchain": {
+    "macports": {
+      "pkg": "https://github.com/macports/macports-base/releases/download/v2.12.7/MacPorts-2.12.7-26-Tahoe.pkg",
+      "sha256": "588f14ccd3c6199559a070a80e6cddd6871721a08cc434775bf54378fd667910",
+      "build_arch": "x86_64",
+      "ports": [
+        "pkgconfig",
+        "gettext",
+        "freetype",
+        "gnutls",
+        "libsdl2",
+        "vulkan-headers",
+        "gstreamer1",
+        "gstreamer1-gst-plugins-base",
+        "gstreamer1-gst-plugins-good",
+        "gstreamer1-gst-plugins-bad",
+        "gstreamer1-gst-libav",
+        "ffmpeg7"
+      ]
+    },
+    "homebrew": [
+      "mingw-w64",
+      "bison",
+      "ccache",
+      "cabextract"
+    ],
+    "macosx_deployment_target": "15.0",
+    "host_triple": "x86_64-apple-darwin24"
+  },
+  "patches": [
+    "0001-use-the-real-user-name.patch",
+    "0003-ntdll-winedllpath-prepend.patch",
+    "0014-msync-unregister-early-return.patch"
+  ]
+}

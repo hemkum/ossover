@@ -1,0 +1,15 @@
+{
+  "schema": "ossover.renderer-pack/1",
+  "id": "dxmt-test",
+  "kind": "dxmt",
+  "version": "0.80",
+  "builtinMarked": true,
+  "requires": { "wineMin": "10.18", "macdrvExports": true },
+  "layout": {
+    "unix": ["winemetal.so"],
+    "pe": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll"],
+    "pe32": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll"]
+  },
+  "overrides": ["dxgi,d3d11,d3d10core=n,b"],
+  "notes": ["Unit-test fixture: a sourceless DXMT pack manifest (what an imported or hand-built pack carries)."]
+}

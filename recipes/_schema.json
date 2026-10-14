@@ -1,0 +1,268 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ossover.invalid/schemas/recipe-1.json",
+  "title": "ossover recipe",
+  "description": "A declarative recipe (CC0) that makes one game or launcher work in a bottle. Mirrors OssoverKit/Model/Recipe.swift: schema ossover.recipe/1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "title", "steps"],
+  "properties": {
+    "schema": { "const": "ossover.recipe/1" },
+    "id": {
+      "type": "string",
+      "description": "Directory-safe id, by convention <game>-<version>-<variant>: witcher3-4.04-dx11.",
+      "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "license": { "type": "string", "description": "SPDX id of the recipe text itself.", "default": "CC0-1.0" },
+    "requires": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/capability" },
+          "uniqueItems": true
+        },
+        "renderers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/rendererKind" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "gameDir": {
+      "type": "string",
+      "description": "Windows path the steps' ${gameDir} expands to (C:\\Games\\The Witcher 3). Required when any step uses ${gameDir}.",
+      "pattern": "^[A-Za-z]:\\\\"
+    },
+    "steps": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/step" }
+    },
+    "knownIssues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["symptom"],
+        "properties": {
+          "symptom": { "type": "string", "minLength": 1 },
+          "cause": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    },
+    "status": {
+      "$ref": "#/definitions/status",
+      "description": "The maintainer's verdict on ossover, summarising `reports` (the open counterpart of a CrossTie medal, REA L-67): untested until somebody ran it."
+    },
+    "reports": {
+      "type": "array",
+      "description": "The observations behind `status`, newest last (a medal entry's rating/version/date).",
+      "items": { "$ref": "#/definitions/report" }
+    }
+  },
+  "definitions": {
+    "when": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "description": "Applies the step only where every given field holds; otherwise the plan skips it and says why. CrossTie `useif platform|locale` (REA L-67) plus an engine-capability all-of predicate (decision 36: a variable only CX-derived engines read).",
+      "properties": {
+        "platform": { "type": "string", "enum": ["mac"], "description": "The host platform; ossover evaluates it as `mac`." },
+        "locale": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{2,3}([_-][A-Za-z0-9]{2,8})*$",
+          "description": "Matches the user's locale exactly (`ja_JP`) or by language (`ja` matches `ja_JP`)."
+        },
+        "engineCapabilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/capability" },
+          "description": "All of these must be on in the engine's manifest."
+        }
+      }
+    },
+    "status": { "type": "string", "enum": ["untested", "works", "partial", "broken"] },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "date"],
+      "properties": {
+        "status": { "$ref": "#/definitions/status" },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "engine": { "type": "string", "description": "Engine id the report was made on." },
+        "renderer": { "$ref": "#/definitions/rendererKind" },
+        "macOS": { "type": "string" },
+        "hardware": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "capability": {
+      "type": "string",
+      "enum": ["msync", "esync", "wow64", "macdrvExports", "dllPathPrepend", "d3dmetalHost"]
+    },
+    "rendererKind": { "type": "string", "enum": ["dxmt", "dxvk", "d3dmetal", "wined3d"] },
+    "rendererChoice": { "type": "string", "enum": ["auto", "dxmt", "dxvk", "d3dmetal", "wined3d"] },
+    "windowsVersion": { "type": "string", "enum": ["win7", "win8", "win81", "win10", "win11"] },
+    "syncMode": { "type": "string", "enum": ["none", "esync", "msync"] },
+    "registryValueType": {
+      "type": "string",
+      "enum": ["REG_SZ", "REG_EXPAND_SZ", "REG_MULTI_SZ", "REG_DWORD", "REG_QWORD", "REG_BINARY"]
+    },
+    "envScope": { "type": "string", "enum": ["bottle", "program"] },
+    "launchMode": { "type": "string", "enum": ["direct", "start"] },
+    "envName": { "type": "string", "pattern": "^[^=\\s]+$" },
+    "windowsPath": {
+      "type": "string",
+      "description": "A Windows path; may use ${gameDir}, ${engine}, %USERPROFILE% and the other standard variables.",
+      "minLength": 1
+    },
+    "step": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": { "const": "winver" },
+            "when": { "$ref": "#/definitions/when" },
+            "value": { "$ref": "#/definitions/windowsVersion" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": { "const": "sync" },
+            "when": { "$ref": "#/definitions/when" },
+            "value": { "$ref": "#/definitions/syncMode" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": { "const": "renderer" },
+            "when": { "$ref": "#/definitions/when" },
+            "value": { "$ref": "#/definitions/rendererChoice" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "retina" },
+            "when": { "$ref": "#/definitions/when" },
+            "value": { "type": "boolean", "default": true },
+            "dpi": { "type": "integer", "minimum": 72, "maximum": 480 }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "key", "name", "data"],
+          "properties": {
+            "type": { "const": "registry" },
+            "when": { "$ref": "#/definitions/when" },
+            "key": { "type": "string", "minLength": 1, "description": "HKCU\\Software\\Wine\\..." },
+            "name": { "type": "string", "minLength": 1 },
+            "valueType": { "$ref": "#/definitions/registryValueType", "default": "REG_SZ" },
+            "data": { "type": "string" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": { "const": "dlloverride" },
+            "when": { "$ref": "#/definitions/when" },
+            "value": { "type": "string", "pattern": "^[^=]+=.*$", "description": "A WINEDLLOVERRIDES fragment: dxgi,d3d11=n,b" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "name", "value"],
+          "properties": {
+            "type": { "const": "env" },
+            "when": { "$ref": "#/definitions/when" },
+            "name": { "$ref": "#/definitions/envName" },
+            "value": { "type": "string" },
+            "scope": { "$ref": "#/definitions/envScope", "default": "bottle" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "verbs"],
+          "properties": {
+            "type": { "const": "winetricks" },
+            "when": { "$ref": "#/definitions/when" },
+            "verbs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[A-Za-z0-9_.+-]+$" } },
+            "optional": { "type": "boolean", "default": false },
+            "note": { "type": "string" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "path", "contents"],
+          "properties": {
+            "type": { "const": "file" },
+            "when": { "$ref": "#/definitions/when" },
+            "path": { "$ref": "#/definitions/windowsPath" },
+            "contents": { "type": "string" },
+            "ifMissing": { "type": "boolean", "default": false }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "path", "key", "value"],
+          "properties": {
+            "type": { "const": "ini" },
+            "when": { "$ref": "#/definitions/when" },
+            "path": { "$ref": "#/definitions/windowsPath" },
+            "section": { "type": ["string", "null"], "description": "null: wherever the key already is, else the first section" },
+            "key": { "type": "string", "minLength": 1 },
+            "value": { "type": "string", "description": "Written verbatim; include quotes when the game expects them." }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "from", "to"],
+          "properties": {
+            "type": { "const": "copy" },
+            "when": { "$ref": "#/definitions/when" },
+            "from": { "type": "string", "minLength": 1, "description": "${engine}/... or engine-relative, or a Windows path inside the prefix" },
+            "to": { "$ref": "#/definitions/windowsPath" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "name", "exe"],
+          "properties": {
+            "type": { "const": "program" },
+            "when": { "$ref": "#/definitions/when" },
+            "id": { "type": "string", "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]{0,127}$", "description": "Defaults to the slug of name." },
+            "name": { "type": "string", "minLength": 1 },
+            "exe": { "$ref": "#/definitions/windowsPath" },
+            "args": { "type": "array", "items": { "type": "string" } },
+            "workingDir": { "$ref": "#/definitions/windowsPath" },
+            "env": { "type": "object", "propertyNames": { "$ref": "#/definitions/envName" }, "additionalProperties": { "type": "string" } },
+            "launchMode": { "$ref": "#/definitions/launchMode", "default": "direct" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["type", "text"],
+          "properties": {
+            "type": { "const": "note" },
+            "when": { "$ref": "#/definitions/when" },
+            "text": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

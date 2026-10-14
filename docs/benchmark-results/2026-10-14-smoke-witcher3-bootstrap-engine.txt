@@ -1,0 +1,44 @@
+ossover smoke --bottle witcher3 --program witcher3 --timeout 240  (engine x64-frankea-wine11.16-cx26.3-v4.6.4b1, renderer dxmt strategy B, sync msync, win10, 2560x1600 borderless, Apple M5 Pro, macOS 26.7.1)
+Verdict: pass. Window 'The Witcher 3' seen after 20.8 s; main-menu sustained ~59 fps (vsync), p50 80, p1-low 40, GPU time mean 2.7 ms.
+Tail of --json output (first lines truncated by the capture):
+=== smoke ===
+    "lastFrame" : 368,
+    "maxSegmentS" : 1.0329999923706055,
+    "minSegmentFPS" : 56.14714465476158,
+    "pairs" : 306,
+    "processID" : 49815,
+    "samples" : 6,
+    "wallS" : 5.070999979972839
+  },
+  "sustainedFPS" : 59.2,
+  "sustainedStats" : {
+    "avgFPS" : 59.80218025387419,
+    "durationS" : 6.136899999999991,
+    "frames" : 367,
+    "gpuTimeMeanMs" : 2.690054495912815,
+    "maxIntervalMs" : 70.83,
+    "p1LowFPS" : 40,
+    "p50FPS" : 80,
+    "p99IntervalMs" : 25,
+    "samples" : 6
+  },
+  "timeoutS" : 240,
+  "verdict" : "pass",
+  "window" : {
+    "alpha" : 1,
+    "bounds" : {
+      "height" : 976,
+      "width" : 1504,
+      "x" : 4,
+      "y" : 3
+    },
+    "id" : 11655,
+    "isOnScreen" : true,
+    "layer" : 0,
+    "name" : "The Witcher 3",
+    "ownerName" : "wine",
+    "ownerPID" : 49815
+  },
+  "windowSeen" : true,
+  "windowSeenAfterS" : 20.8
+}

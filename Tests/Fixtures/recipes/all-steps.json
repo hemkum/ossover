@@ -1,0 +1,29 @@
+{
+  "schema": "ossover.recipe/1",
+  "id": "fixture-all-steps",
+  "title": "Every step type (fixture)",
+  "description": "Unit-test fixture exercising each RecipeStep case once.",
+  "license": "CC0-1.0",
+  "requires": { "capabilities": [], "renderers": [] },
+  "gameDir": "C:\\Games\\Fixture",
+  "steps": [
+    { "type": "winver", "value": "win7" },
+    { "type": "sync", "value": "esync" },
+    { "type": "renderer", "value": "wined3d" },
+    { "type": "retina", "value": false },
+    { "type": "registry", "key": "HKCU\\Software\\Fixture", "name": "Flag", "valueType": "REG_DWORD", "data": "1" },
+    { "type": "registry", "key": "HKCU\\Software\\Fixture", "name": "Name", "data": "x" },
+    { "type": "dlloverride", "value": "amd_ags_x64=" },
+    { "type": "env", "name": "FIXTURE_PROGRAM", "value": "1", "scope": "program" },
+    { "type": "env", "name": "FIXTURE_BOTTLE", "value": "2" },
+    { "type": "winetricks", "verbs": ["corefonts"], "optional": false },
+    { "type": "file", "path": "${gameDir}\\note.txt", "contents": "hi\n", "ifMissing": true },
+    { "type": "ini", "path": "${gameDir}\\game.ini", "key": "Fullscreen", "value": "0" },
+    { "type": "copy", "from": "${engine}/share/wine/fixture.dll", "to": "C:\\windows\\system32\\fixture.dll", "when": { "platform": "mac", "engineCapabilities": ["msync"] } },
+    { "type": "program", "name": "Fixture Game", "exe": "${gameDir}\\game.exe", "launchMode": "start" },
+    { "type": "note", "text": "done" }
+  ],
+  "knownIssues": [
+    { "symptom": "none", "cause": "fixture", "fix": "nothing" }
+  ]
+}

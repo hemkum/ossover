@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog:
+    name: Catalog JSON and shell syntax
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax (bash -n)
+        run: |
+          set -euo pipefail
+          status=0
+          for f in engine/*.sh scripts/probes/*.sh; do
+            if bash -n "$f"; then echo "ok   $f"; else echo "FAIL $f"; status=1; fi
+          done
+          exit "$status"
+
+      # Structural check of the manifests and recipes the CLI reads from the checkout:
+      # standard library only, isolated interpreter, no network. Run it locally with
+      # `python3 -I .github/scripts/catalog_check.py .`
+      - name: Catalog check (engines/, renderers/, recipes/)
+        run: python3 -I .github/scripts/catalog_check.py "$GITHUB_WORKSPACE"
+
+  swift:
+    name: swift build and test (macos-15, arm64)
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      # Keep anything the CLI writes out of the runner's home directory.
+      OSSOVER_HOME: ${{ runner.temp }}/ossover-home
+      OSSOVER_REPO: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The image's default Xcode. Package.swift needs swift-tools-version 6.1 (Xcode 16.3 or
+      # newer). To pin a specific one: sudo xcode-select -s /Applications/Xcode_<version>.app
+      - name: Toolchain
+        id: toolchain
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift --version
+          uname -m
+          swift_id=$(swift --version 2>&1 | grep -oE 'Swift version [0-9.]+' | head -n1 | tr ' ' '_' || true)
+          echo "swift=${swift_id:-unknown}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache SwiftPM build directory
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: spm-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.swift }}-${{ hashFiles('Package.resolved', 'Package.swift') }}
+          restore-keys: |
+            spm-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.swift }}-
+
+      - name: swift build
+        run: swift build
+
+      - name: swift test
+        run: swift test
+
+      # The Swift decoders over the same files the Python step checked: engine manifests
+      # through the hidden validate-manifest subcommand, then the catalog listings and the
+      # recipe list. Read-only; nothing is installed or downloaded.
+      - name: Catalog decodes with the Swift models
+        run: |
+          set -euo pipefail
+          mkdir -p "$OSSOVER_HOME"
+          for f in engines/*.json; do
+            .build/debug/ossover engine validate-manifest "$f"
+          done
+          .build/debug/ossover engine list --catalog
+          .build/debug/ossover renderer list --catalog
+          .build/debug/ossover recipe list
+
+      # Packaging rules and release gates of engine/package.sh + gates.sh on a synthetic
+      # Mach-O tree (~10 s): rpath policy, manifest.py, offline gates and their negative
+      # cases. No engine is built or downloaded. With OSSOVER_BIN set it also runs
+      # `ossover engine validate-manifest --layout` on the generated manifest.
+      - name: Engine packaging self-test
+        run: OSSOVER_BIN="$PWD/.build/debug/ossover" bash engine/selftest.sh

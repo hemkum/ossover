@@ -1,0 +1,66 @@
+{
+  "schema": "ossover.recipe/1",
+  "id": "steam-client",
+  "title": "Steam (Windows client in a bottle; fallback only)",
+  "description": "Fallback B of the Witcher 3 pipeline: the Windows Steam client inside its own bottle, for when steamcmd and DepotDownloader are both out. Mirrors what CodeWeavers' Steam CrossTie (cxversion 26) sets up: a win10 64-bit bottle, Core Fonts + the latest VC++ runtime (x64 and x86) + d3dcompiler_47 (both bitnesses), MSync on, and WINE_WAIT_CHILD_PIPE_IGNORE=steam.exe (REA L-69, L-34). ossover downloads no installer; run SteamSetup.exe yourself with `ossover run`. Do not apply this to the witcher3 bottle.",
+  "license": "CC0-1.0",
+  "status": "untested",
+  "requires": {
+    "capabilities": [],
+    "renderers": []
+  },
+  "steps": [
+    { "type": "winver", "value": "win10" },
+    { "type": "sync", "value": "msync" },
+    {
+      "type": "winetricks",
+      "verbs": ["corefonts", "vcrun2022", "d3dcompiler_47"],
+      "optional": false,
+      "note": "The CX Steam tie's dependencies (L-69): Core Fonts, VC++ latest x64 + x86 (vcrun2022 installs both bitnesses in one verb), d3dcompiler_47 for both bitnesses. Needs cabextract (brew install cabextract); the Asian Fonts dependency is not carried over."
+    },
+    { "type": "env", "name": "CEF_DISABLE_SANDBOX", "value": "1", "scope": "bottle" },
+    { "type": "env", "name": "LC_ALL", "value": "en_US.UTF-8", "scope": "bottle" },
+    {
+      "type": "env",
+      "name": "WINE_WAIT_CHILD_PIPE_IGNORE",
+      "value": "steam.exe",
+      "scope": "bottle",
+      "when": { "engineCapabilities": ["msync"] }
+    },
+    {
+      "type": "program",
+      "id": "steam",
+      "name": "Steam",
+      "exe": "C:\\Program Files (x86)\\Steam\\steam.exe",
+      "args": [],
+      "launchMode": "start"
+    },
+    { "type": "note", "text": "Install the client yourself: download SteamSetup.exe from store.steampowered.com on the Mac, then run `ossover run --bottle <bottle> 'Z:\\Users\\<you>\\Downloads\\SteamSetup.exe'`. ossover never downloads installers." },
+    { "type": "note", "text": "For The Witcher 3: Library > The Witcher 3: Wild Hunt > Properties > Betas > select `next-gen` (4.04, DirectX 11 exe); under Launch Options add `--launcher-skip -skipStartScreen`. Turn off automatic updates for the game so Steam cannot move it to the DX12-only 5.x Remastered." },
+    { "type": "note", "text": "Sync is msync, as CrossOver does for every Steam install (the tie pulls in 'Enable MSync', L-34); an engine without msync gets `none` from WineEnvironment.effectiveSync." },
+    { "type": "note", "text": "WINE_WAIT_CHILD_PIPE_IGNORE=steam.exe is set on CX-derived engines only (the msync capability is the proxy): its readers are in the CrossOver tree's ntdll (src:dlls/ntdll/unix/server.c:1758-1776, process.c:477, 2343) and no upstream reader is known. The tie sets it as installerenvironment; ossover keeps it in the bottle because it does not run the installer itself." },
+    { "type": "note", "text": "CEF_DISABLE_SANDBOX=1 and LC_ALL=en_US.UTF-8 are ossover-specific: the CX Steam tie sets neither (L-69) and CrossOver never sets a global LC_ALL (L-14)." }
+  ],
+  "knownIssues": [
+    {
+      "symptom": "Steam window is blank or the login page never renders",
+      "cause": "Chromium Embedded Framework sandbox cannot start under Wine",
+      "fix": "CEF_DISABLE_SANDBOX=1 (set by this recipe); restart the bottle with `ossover bottle stop` then run again."
+    },
+    {
+      "symptom": "Login hangs after the credentials are accepted",
+      "cause": "Engines whose kernelbase.dll was built with llvm-mingw stall Steam's login (frankea/winecx-gptk bisect)",
+      "fix": "Use an ossover engine built with mingw-w64 GCC, or the bootstrap engine."
+    },
+    {
+      "symptom": "Garbled or missing text in the client",
+      "cause": "Locale not UTF-8",
+      "fix": "LC_ALL=en_US.UTF-8 (set by this recipe)."
+    },
+    {
+      "symptom": "winetricks fails at once with 'cabextract not found'",
+      "cause": "Core Fonts and d3dcompiler_47 are cab archives; winetricks needs cabextract to unpack them",
+      "fix": "brew install cabextract, then apply again."
+    }
+  ]
+}

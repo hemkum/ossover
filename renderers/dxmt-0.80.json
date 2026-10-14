@@ -1,0 +1,31 @@
+{
+  "schema": "ossover.renderer-pack/1",
+  "id": "dxmt-0.80",
+  "kind": "dxmt",
+  "version": "0.80",
+  "source": {
+    "url": "https://github.com/3Shain/dxmt/releases/download/v0.80/dxmt-v0.80-builtin.tar.gz",
+    "sha256": "8f260e36b5739e68f3bad613381441385c4dc7b85b78ba8de653d5a6a264529d",
+    "size": 18681669,
+    "license": "MIT",
+    "extract": { "strip": 1, "into": "wine" }
+  },
+  "builtinMarked": true,
+  "requires": {
+    "wineMin": "10.18",
+    "macdrvExports": true
+  },
+  "layout": {
+    "unix": ["winemetal.so"],
+    "pe": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll", "nvapi64.dll", "nvngx.dll"],
+    "pe32": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll"]
+  },
+  "overrides": ["dxgi,d3d11,d3d10core=n,b"],
+  "notes": [
+    "DXMT 0.80 release asset (3Shain/dxmt). Layout confirmed 2026-10-13 with `tar tzf` on the 18,681,669-byte asset: v0.80/x86_64-unix/winemetal.so, v0.80/x86_64-windows/{d3d10core,d3d11,dxgi,winemetal,nvapi64,nvngx}.dll, v0.80/i386-windows/{d3d10core,d3d11,dxgi,winemetal}.dll. strip 1 into wine/ gives wine/x86_64-unix etc. directly; no directory renaming needed.",
+    "The PE DLLs carry the 17-byte `Wine builtin DLL` DOS-stub mark at offset 0x40 (confirmed on x86_64-windows/d3d11.dll; REA L-25). Strategy B (bootstrap engine, no WINEDLLPATH_PREPEND) copies only d3d11/dxgi/d3d10core into the prefix's system32 with the mark stripped and needs `overrides` (`dxgi,d3d11,d3d10core=n,b`); never winemetal.dll, never nvapi64/nvngx (decision 12(a), 15). Strategy C keeps the mark, prepends wine/ to the DLL path and applies no override at all: a prepended builtin wins by path and CrossOver uses no WINEDLLOVERRIDES for any backend (REA L-05, L-20, L-26; decision 39).",
+    "Needs winemac.so to export macdrv_functions (winemetal.so dlsyms it and reads slots of the 24-entry table, REA L-60/L-61) and Wine 10.18 or later for the winemetal ABI (plan §7 risk 1). On the frankea bootstrap engine a winemetal.so already ships inside lib/wine/x86_64-unix and this pack's copy shadows it only under strategy C; under strategy B the pack's D3D DLLs run against the engine's winemetal pair, so the resolver refuses this pack there unless the engine's bundled DXMT version matches (decision 12(c); frankea's winemetal.so bytes differ from this asset's — U-20).",
+    "winemetal.so is built for macOS 14.0 (LC_BUILD_VERSION minos 14.0, REA L-62): an engine that bundles this overlay gets minMacOS 14.0 at least (decision 29; EngineStore.minMacOSFloor).",
+    "nvapi64.dll and nvngx.dll are DXMT's DLSS-on-MetalFX shims; never copied into a prefix under strategy B (decision 12(a)). The `dlssMetalFX` setting is DXMT_ENABLE_NVEXT=1 in the process env, a string in the DXMT PE DLLs (REA L-58, L-59; decision 9); no override is involved."
+  ]
+}

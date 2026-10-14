@@ -1,0 +1,113 @@
+# Release stub: builds the CLI in release configuration on an arm64 macOS runner, tars it with
+# the licence, notices and catalogs, and attaches it to a GitHub release. Manual dispatch only.
+#
+# TODO(notarization): the tarball is unsigned (SwiftPM output is ad-hoc signed at best). For a
+# Developer ID release add, between "Package" and "Create the GitHub release":
+#   1. import the "Developer ID Application" certificate into a temporary keychain
+#      (secrets: DEVELOPER_ID_P12, DEVELOPER_ID_P12_PASSWORD);
+#   2. codesign --force --options runtime --timestamp --sign "Developer ID Application: <name>" dist/<name>/ossover
+#   3. zip the binary and `xcrun notarytool submit --wait` it
+#      (secrets: APPLE_ID, APPLE_TEAM_ID, APPLE_APP_SPECIFIC_PASSWORD);
+#   4. a bare executable cannot be stapled; ship a .pkg or .dmg if stapling is wanted.
+# Until then users remove quarantine themselves: xattr -d com.apple.quarantine ossover
+# (engines ossover installs are de-quarantined by ossover; this is only about the CLI binary).
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag such as v0.1.0. Built from that tag if it exists, otherwise created at the current commit."
+        required: true
+        type: string
+      prerelease:
+        description: "Mark the GitHub release as a pre-release"
+        type: boolean
+        default: true
+      draft:
+        description: "Create the release as a draft (publish by hand after checking the assets)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  cli:
+    name: Build and attach the CLI (macos-15, arm64)
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag
+        run: |
+          set -euo pipefail
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "tag must look like v1.2.3 or v1.2.3-beta.1, got '$TAG'"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            git checkout -q "refs/tags/$TAG"
+            echo "building existing tag $TAG at $(git rev-parse --short HEAD)"
+          else
+            echo "tag $TAG does not exist yet; gh release create will create it at $(git rev-parse --short HEAD)"
+          fi
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          uname -m
+
+      - name: swift build -c release
+        run: swift build -c release --product ossover
+
+      # The CLI reads engines/, renderers/ and recipes/ from a checkout ($OSSOVER_REPO, the
+      # working directory or its parents; RepoRoot.isRepo wants Package.swift + engines/ +
+      # recipes/ there), so the tarball carries the catalogs and Package.swift next to the
+      # binary: `OSSOVER_REPO=<extracted dir> ossover ...` works without a git clone.
+      - name: Package
+        id: package
+        run: |
+          set -euo pipefail
+          name="ossover-${TAG}-macos-arm64"
+          stage="dist/$name"
+          mkdir -p "$stage"
+          cp .build/release/ossover "$stage/"
+          cp LICENSE NOTICE.md Package.swift "$stage/"
+          [ -f README.md ] && cp README.md "$stage/"
+          cp -R LICENSES engines renderers recipes "$stage/"
+          tar -C dist -czf "dist/$name.tar.gz" "$name"
+          (cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256")
+          cat "dist/$name.tar.gz.sha256"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test the packaged binary
+        run: |
+          set -euo pipefail
+          name="${{ steps.package.outputs.name }}"
+          tmp=$(mktemp -d)
+          tar -C "$tmp" -xzf "dist/$name.tar.gz"
+          "$tmp/$name/ossover" --version
+          "$tmp/$name/ossover" --help >/dev/null
+          # The catalogs inside the tarball are found through OSSOVER_REPO (no checkout needed).
+          OSSOVER_HOME="$tmp/home" OSSOVER_REPO="$tmp/$name" "$tmp/$name/ossover" recipe list
+          (cd dist && shasum -a 256 -c "$name.tar.gz.sha256")
+
+      - name: Create the GitHub release and attach the tarball
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DRAFT: ${{ inputs.draft }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          args=(--title "ossover $TAG" --generate-notes)
+          [ "$DRAFT" = "true" ] && args+=(--draft)
+          [ "$PRERELEASE" = "true" ] && args+=(--prerelease)
+          gh release create "$TAG" "${args[@]}" dist/*.tar.gz dist/*.sha256

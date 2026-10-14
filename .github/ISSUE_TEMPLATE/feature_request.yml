@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose a change to the CLI, OssoverKit, the engine build, recipes or docs.
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Out of scope by design, so please do not ask: bundling or downloading Apple's D3DMetal, anything that needs proprietary CrossOver code or data, and any form of Steam password handling.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI (ossover)
+        - OssoverKit (library)
+        - Engine build (engine/)
+        - Recipes and compatibility database
+        - Renderer packs (DXMT, DXVK, GPTK import)
+        - Benchmark and smoke harness
+        - Store support (Steam, GOG, Epic, ...)
+        - Documentation
+        - GUI app (future)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can you not do today, or what is harder than it should be?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change? Command lines, manifest or recipe fields, and expected output help more than adjectives.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Prior art and evidence
+      description: If this mirrors what CrossOver, Whisky, Highball or another project does, say what you observed (behaviour, documentation, LGPL source file and line). Never paste proprietary code.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and discussions.
+          required: true
+        - label: I would be willing to implement this.

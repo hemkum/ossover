@@ -1,0 +1,1 @@
+winetricks: https://github.com/Winetricks/winetricks (LGPL-2.1+), src/winetricks at commit f3890f670867b5ffbc3938726db45c0f7d16c8ba

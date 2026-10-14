@@ -1,0 +1,225 @@
+{
+  "schema": "ossover.engine-manifest/1",
+  "id": "x64-ossover-cx26.3-r1",
+  "displayName": "ossover Wine 11.0 (CrossOver 26.3.0 sources) r1",
+  "version": "26.3.0-r1",
+  "wineVersion": "11.0",
+  "wineVersionString": "wine-11.0-8726-g2e2f5fca349",
+  "arch": "x86_64",
+  "minMacOS": "15.0",
+  "requires": [
+    "rosetta2"
+  ],
+  "source": {
+    "url": "file:///opt/ossover/engine/out/x64-ossover-cx26.3-r1.tar.xz",
+    "sha256": "TBD",
+    "license": "LGPL-2.1-or-later (Wine; bundled components listed under components[])",
+    "extract": {
+      "strip": 1,
+      "into": "."
+    }
+  },
+  "paths": {
+    "wine": "wine/bin/wine",
+    "wineserver": "wine/bin/wineserver",
+    "libWine": "wine/lib/wine"
+  },
+  "baseEnv": {
+    "GST_PLUGIN_SYSTEM_PATH": "${engine}/wine/lib/gstreamer-1.0",
+    "GST_REGISTRY": "${engine}/gst-registry-x86_64.bin",
+    "GST_PLUGIN_SCANNER": "${engine}/wine/libexec/gstreamer-1.0/gst-plugin-scanner"
+  },
+  "capabilities": {
+    "msync": true,
+    "esync": false,
+    "wow64": true,
+    "macdrvExports": true,
+    "dllPathPrepend": true,
+    "d3dmetalHost": true
+  },
+  "bundledRenderers": [
+    {
+      "kind": "dxmt",
+      "version": "0.80",
+      "path": "overlays/dxmt",
+      "layout": {
+        "unix": [
+          "winemetal.so"
+        ],
+        "pe": [
+          "d3d10core.dll",
+          "d3d11.dll",
+          "dxgi.dll",
+          "nvapi64.dll",
+          "nvngx.dll",
+          "winemetal.dll"
+        ],
+        "pe32": [
+          "d3d10core.dll",
+          "d3d11.dll",
+          "dxgi.dll",
+          "winemetal.dll"
+        ]
+      },
+      "builtinMarked": true,
+      "minMacOS": "14.0",
+      "requires": {
+        "macdrvExports": true,
+        "dllPathPrepend": true
+      }
+    },
+    {
+      "kind": "dxvk",
+      "version": "1.10.3-20230507-repack",
+      "path": "overlays/dxvk",
+      "layout": {
+        "unix": [],
+        "pe": [
+          "d3d10core.dll",
+          "d3d11.dll",
+          "d3d9.dll",
+          "dxgi.dll"
+        ],
+        "pe32": [
+          "d3d10core.dll",
+          "d3d11.dll",
+          "d3d9.dll",
+          "dxgi.dll"
+        ]
+      },
+      "builtinMarked": true,
+      "requires": {
+        "dllPathPrepend": true
+      }
+    }
+  ],
+  "notes": [
+    "Built by engine/build.sh + engine/package.sh from CodeWeavers' CrossOver 26.3.0 LGPL sources (Wine 11.0) with engine/patches/*; manifest written by engine/manifest.py.",
+    "Keys outside the EngineManifest model (components, build, licenses, bundledRenderers[].requires/minMacOS) are the packaging record; ossover drops them when it re-saves the manifest at install.",
+    "minMacOS is max(toolchain deployment target 15.0, overlay floor 14.0): DXMT's winemetal.so and GPTK's libd3dshared/D3DMetal are minos 14.0 (REA L-62).",
+    "capabilities are measured on the tree (strings/nm), not assumed; esync is false because the CrossOver tree does not compile it in (REA L-32)."
+  ],
+  "addons": {
+    "wineMono": "10.4.1",
+    "wineGecko": "2.47.4"
+  },
+  "components": [
+    {
+      "id": "crossover-sources",
+      "version": "26.3.0",
+      "url": "https://media.codeweavers.com/pub/crossover/source/crossover-sources-26.3.0.tar.gz",
+      "sha256": "ac99c8ca4b3848f3e81784135f023df266b61c2345726ea55a50b3e030dd6872",
+      "size": 149054023,
+      "license": "LGPL-2.1-or-later (wine), see sources/*/LICENSE",
+      "bundled": false,
+      "path": "wine source (built, not shipped as source)"
+    },
+    {
+      "id": "dxmt",
+      "version": "0.80",
+      "url": "https://github.com/3Shain/dxmt/releases/download/v0.80/dxmt-v0.80-builtin.tar.gz",
+      "sha256": "8f260e36b5739e68f3bad613381441385c4dc7b85b78ba8de653d5a6a264529d",
+      "size": 18681669,
+      "license": "MIT (v0.80; later releases LGPL-2.1-or-later)",
+      "bundled": true,
+      "path": "overlays/dxmt"
+    },
+    {
+      "id": "moltenvk",
+      "version": "1.4.2",
+      "url": "https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar",
+      "sha256": "f95765a6229cb7b915990a2890ce12ebe36a730b021545d3d52ae69ce4c4024e",
+      "size": 59563008,
+      "license": "Apache-2.0",
+      "bundled": true,
+      "path": "wine/lib/libMoltenVK.dylib"
+    },
+    {
+      "id": "dxvk-macos",
+      "version": "1.10.3-20230507-repack",
+      "url": "https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/dxvk-macOS-async-v1.10.3-20230507-repack-builtin.tar.gz",
+      "sha256": "TBD",
+      "size": 2785833,
+      "license": "zlib",
+      "bundled": true,
+      "path": "overlays/dxvk"
+    },
+    {
+      "id": "wine-mono",
+      "version": "10.4.1",
+      "url": "https://dl.winehq.org/wine/wine-mono/10.4.1/wine-mono-10.4.1-x86.tar.xz",
+      "sha256": "TBD",
+      "size": 39590692,
+      "license": "mixed (see wine-mono LICENSE)",
+      "bundled": true,
+      "path": "wine/share/wine/mono"
+    },
+    {
+      "id": "wine-gecko-x86",
+      "version": "2.47.4",
+      "url": "https://dl.winehq.org/wine/wine-gecko/2.47.4/wine-gecko-2.47.4-x86.tar.xz",
+      "sha256": "TBD",
+      "size": 43025064,
+      "license": "MPL-2.0",
+      "bundled": true,
+      "path": "wine/share/wine/gecko"
+    },
+    {
+      "id": "wine-gecko-x86_64",
+      "version": "2.47.4",
+      "url": "https://dl.winehq.org/wine/wine-gecko/2.47.4/wine-gecko-2.47.4-x86_64.tar.xz",
+      "sha256": "TBD",
+      "size": 41935496,
+      "license": "MPL-2.0",
+      "bundled": true,
+      "path": "wine/share/wine/gecko"
+    },
+    {
+      "id": "macports-closure",
+      "version": null,
+      "url": "https://www.macports.org/",
+      "sha256": null,
+      "size": null,
+      "license": "per library (freetype FTL/GPL-2, gnutls LGPL-2.1+, GStreamer LGPL-2.1+, FFmpeg LGPL-2.1+/GPL, SDL2 zlib, glib LGPL-2.1+)",
+      "bundled": true,
+      "path": "wine/lib/*.dylib, wine/lib/gstreamer-1.0",
+      "ports": [
+        "pkgconfig",
+        "gettext",
+        "freetype",
+        "gnutls",
+        "libsdl2",
+        "vulkan-headers",
+        "gstreamer1"
+      ]
+    }
+  ],
+  "build": {
+    "date": "2026-10-14T00:00:00Z",
+    "hostMacOS": "selftest",
+    "sdk": "selftest",
+    "deploymentTarget": "15.0",
+    "overlayMinMacOS": "14.0",
+    "clang": "selftest",
+    "mingw": "selftest",
+    "patches": [
+      "0001-use-the-real-user-name.patch",
+      "0003-ntdll-winedllpath-prepend.patch",
+      "0014-msync-unregister-early-return.patch"
+    ],
+    "patchesExpected": [
+      "0001-use-the-real-user-name.patch",
+      "0003-ntdll-winedllpath-prepend.patch",
+      "0014-msync-unregister-early-return.patch"
+    ],
+    "inputsSha256": "0c6265f433a24b2544eebd4aa5bd73bf29025cc388a83413bac7b89713884289",
+    "installStamp": "selftest",
+    "gstreamerPlugins": 0,
+    "winemetalBuiltin": true,
+    "recipe": "engine/build.sh + engine/package.sh (ossover)"
+  },
+  "licenses": {
+    "wine": "LGPL-2.1-or-later (CrossOver sources; see NOTICE.md)",
+    "note": "D3DMetal is never bundled; a user imports Apple's GPTK with `ossover renderer import-gptk`"
+  }
+}

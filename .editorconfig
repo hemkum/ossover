@@ -1,0 +1,36 @@
+# EditorConfig: https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Swift (4), Python (4) and C (4) use the default above.
+
+[*.{json,ndjson,yml,yaml}]
+indent_size = 2
+
+# engine/*.sh are written with 2-space indents; scripts/probes/build.sh uses 4.
+[engine/*.sh]
+indent_size = 2
+
+[*.md]
+# Two trailing spaces are a Markdown hard line break.
+trim_trailing_whitespace = false
+
+[*.{patch,diff}]
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[Tests/Fixtures/**]
+# Captured verbatim; see .gitattributes.
+end_of_line = unset
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[Makefile]
+indent_style = tab

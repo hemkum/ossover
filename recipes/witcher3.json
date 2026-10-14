@@ -1,0 +1,141 @@
+{
+  "schema": "ossover.recipe/1",
+  "id": "witcher3-4.04-dx11",
+  "title": "The Witcher 3: Wild Hunt 4.04 (next-gen branch, DirectX 11)",
+  "description": "Steam depot 292030 on the `next-gen` branch (4.04), launched directly from witcher3.exe with DXMT, msync and a 64-bit Windows 10 prefix. HairWorks off, borderless 2560x1600 High: the ossover benchmark profile.",
+  "license": "CC0-1.0",
+  "status": "untested",
+  "requires": {
+    "capabilities": [
+      "msync"
+    ],
+    "renderers": [
+      "dxmt"
+    ]
+  },
+  "gameDir": "C:\\Games\\The Witcher 3",
+  "steps": [
+    {
+      "type": "winver",
+      "value": "win10"
+    },
+    {
+      "type": "sync",
+      "value": "msync"
+    },
+    {
+      "type": "renderer",
+      "value": "dxmt"
+    },
+    {
+      "type": "retina",
+      "value": true,
+      "dpi": 96
+    },
+    {
+      "type": "env",
+      "name": "ROSETTA_ADVERTISE_AVX",
+      "value": "1",
+      "scope": "bottle"
+    },
+    {
+      "type": "file",
+      "path": "${gameDir}\\launcher-configuration.json",
+      "contents": "{\n    \"fallback\": \"DirectX 11\"\n}\n",
+      "ifMissing": false
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Rendering",
+      "key": "HairWorksLevel",
+      "value": "0"
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "Resolution",
+      "value": "\"2560x1600\""
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "FullScreenMode",
+      "value": "1"
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "VSync",
+      "value": "false"
+    },
+    {
+      "type": "program",
+      "id": "witcher3",
+      "name": "The Witcher 3",
+      "exe": "${gameDir}\\bin\\x64\\witcher3.exe",
+      "args": [
+        "--launcher-skip",
+        "-skipStartScreen"
+      ],
+      "workingDir": "${gameDir}\\bin\\x64",
+      "env": {},
+      "launchMode": "direct"
+    },
+    {
+      "type": "note",
+      "text": "Saves live at <bottle>/prefix/drive_c/users/<you>/Documents/The Witcher 3/gamesaves."
+    },
+    {
+      "type": "note",
+      "text": "Keep HairWorks off (HairWorksLevel=0): it crashes under every Mac renderer."
+    },
+    {
+      "type": "note",
+      "text": "Use dxmt, not dxvk: DXVK on macOS makes sirens, rotfiends and hounds invisible (no transform feedback in MoltenVK)."
+    },
+    {
+      "type": "note",
+      "text": "Never install the Steam client in this bottle; the depot was fetched with steamcmd and witcher3.exe runs DRM-free. A re-fetch without --allow-update is refused so Steam cannot move 4.04 to the DX12-only 5.x Remastered."
+    },
+    {
+      "type": "note",
+      "text": "The launcher-configuration.json fallback is rewritten every time this recipe runs; re-apply it after any fetch."
+    }
+  ],
+  "knownIssues": [
+    {
+      "symptom": "Crash or hang when a character with HairWorks hair appears",
+      "cause": "NVIDIA HairWorks has no working path on Metal",
+      "fix": "Leave HairWorksLevel=0 in user.settings [Rendering]; the recipe sets it."
+    },
+    {
+      "symptom": "Sirens, rotfiends, hounds and some water effects are invisible",
+      "cause": "DXVK on macOS lacks D3D11 stream output (MoltenVK has no VK_EXT_transform_feedback)",
+      "fix": "Use renderer dxmt (the recipe's default)."
+    },
+    {
+      "symptom": "Game exits at once complaining about VCRUNTIME140.dll / MSVCP140.dll",
+      "cause": "A missing Visual C++ runtime in the prefix",
+      "fix": "Apply the separate recipe `ossover recipe apply witcher3-vcrun --bottle <bottle>` (winetricks vcrun2019 vcrun2013 vcrun2012; needs cabextract). It is not part of this recipe: Wine's builtin runtimes are the benchmark configuration and the ~100 MB download is only worth it on this abort."
+    },
+    {
+      "symptom": "Black screen after an update; bin/x64/witcher3.exe is gone",
+      "cause": "Steam moved the install to 5.x Remastered, which is DirectX 12 only",
+      "fix": "Fetch again with `ossover steam fetch --app 292030 --branch next-gen --allow-update` and re-apply this recipe."
+    },
+    {
+      "symptom": "Low or uneven frame rate with sync none or esync",
+      "cause": "Only msync (CrossOver-derived engines) avoids wineserver round trips for Mach semaphores",
+      "fix": "Use an engine with the msync capability; the recipe sets sync msync."
+    },
+    {
+      "symptom": "DXMT log: 'CreateGeometryShaderWithStreamOutput: not supported, expect problem' (seen 7x at startup on DXMT 0.80, observed 2026-10-14 on an M5 Pro)",
+      "cause": "The game creates stream-output geometry shaders (used by some monster/particle effects); DXMT 0.80 has no stream-output support, same gap as DXVK-on-MoltenVK",
+      "fix": "The game continues and the menu/world render; expect some effects (possibly sirens/rotfiends) to be missing on DXMT too. D3DMetal is the only path that implements stream output on macOS."
+    }
+  ]
+}

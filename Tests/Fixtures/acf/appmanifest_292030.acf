@@ -1,0 +1,41 @@
+"AppState"
+{
+	"appid"		"292030"
+	"universe"		"1"
+	"LauncherPath"		"C:\\Program Files (x86)\\Steam\\steam.exe"
+	"name"		"The Witcher 3: Wild Hunt"
+	"StateFlags"		"4"
+	"installdir"		"The Witcher 3"
+	"LastUpdated"		"1760000000"
+	"SizeOnDisk"		"53687091200"
+	"StagingSize"		"0"
+	"buildid"		"11916098"
+	"LastOwner"		"76561190000000000"
+	"UpdateResult"		"0"
+	"BytesToDownload"		"0"
+	"BytesDownloaded"		"0"
+	"BytesToStage"		"0"
+	"BytesStaged"		"0"
+	"TargetBuildID"		"11916098"
+	"AutoUpdateBehavior"		"0"
+	"AllowOtherDownloadsWhileRunning"		"0"
+	"ScheduledAutoUpdate"		"0"
+	"InstalledDepots"
+	{
+		"292031"
+		{
+			"manifest"		"1234567890123456789"
+			"size"		"1073741824"
+		}
+	}
+	"UserConfig"
+	{
+		"language"		"english"
+		"BetaKey"		"next-gen"
+	}
+	"MountedConfig"
+	{
+		"language"		"english"
+		"BetaKey"		"next-gen"
+	}
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "ossover.engine-manifest/1",
+  "id": "x64-gcenx-wine-devel-11.18",
+  "displayName": "Gcenx wine-devel 11.18 (vanilla upstream Wine; control engine)",
+  "version": "11.18",
+  "wineVersion": "11.18",
+  "arch": "x86_64",
+  "minMacOS": "15.0",
+  "requires": ["rosetta2"],
+  "source": {
+    "url": "https://github.com/Gcenx/macOS_Wine_builds/releases/download/11.18/wine-devel-11.18-osx64.tar.xz",
+    "sha256": "TBD",
+    "license": "LGPL-2.1-or-later",
+    "extract": { "strip": 2, "into": "app" }
+  },
+  "paths": {
+    "wine": "app/Resources/wine/bin/wine",
+    "wineserver": "app/Resources/wine/bin/wineserver",
+    "libWine": "app/Resources/wine/lib/wine"
+  },
+  "baseEnv": {},
+  "capabilities": {
+    "msync": false,
+    "esync": false,
+    "wow64": true,
+    "macdrvExports": false,
+    "dllPathPrepend": false,
+    "d3dmetalHost": false
+  },
+  "bundledRenderers": [],
+  "notes": [
+    "Control engine (plan §3 Phase 2 step 5): vanilla upstream Wine from Gcenx's macOS_Wine_builds. DXMT must FAIL on it (winemac.so exports no macdrv_functions) and msync is absent; it exists to prove the capability gates, not to run games.",
+    "TODO(REA): sha256 is TBD; EngineStore refuses to install an unpinned source. Pin it on first download (`shasum -a 256 wine-devel-11.18-osx64.tar.xz`) and confirm the layout with `tar tJf`.",
+    "TODO(REA): extract/paths assume the asset unpacks as `Wine Devel.app/Contents/{Info.plist,MacOS/,Resources/wine/{bin,lib,share}}` (Gcenx's usual packaging), so strip 2 into app/ yields app/Resources/wine/bin/wine. Fix the three paths if `tar tJf` says otherwise.",
+    "Capabilities are expectations (not yet probed): no WINEMSYNC, no WINEESYNC, no WINEDLLPATH_PREPEND, no CX_APPLEGPTK hook, no macdrv_functions export; WoW64 (i386-windows without i386-unix) as all Gcenx 10.x+ builds. EngineStore re-probes at install and records what the binaries say."
+  ]
+}

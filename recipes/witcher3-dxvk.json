@@ -1,0 +1,136 @@
+{
+  "schema": "ossover.recipe/1",
+  "id": "witcher3-4.04-dx11-dxvk",
+  "title": "The Witcher 3: Wild Hunt 4.04 (next-gen branch, DirectX 11) — DXVK benchmark variant",
+  "description": "The benchmark-matrix variant of witcher3-4.04-dx11 (decision 35): identical in every step except the renderer, which is dxvk, as CodeWeavers' own CrossTie for Steam 292030 selects (its only dependency is the 'DXVK (Builtin)' profile, CX_GRAPHICS_BACKEND=dxvk, REA L-68; what CrossOver's 'Auto' picks for the title is unknown, U-1). It exists so the '≥0.9× CrossOver' comparison runs like against like; the DXMT recipe stays the default for playing. Known on macOS: sirens, rotfiends and hounds are invisible under DXVK (no D3D11 stream output in MoltenVK).",
+  "license": "CC0-1.0",
+  "status": "untested",
+  "requires": {
+    "capabilities": [
+      "msync"
+    ],
+    "renderers": [
+      "dxvk"
+    ]
+  },
+  "gameDir": "C:\\Games\\The Witcher 3",
+  "steps": [
+    {
+      "type": "winver",
+      "value": "win10"
+    },
+    {
+      "type": "sync",
+      "value": "msync"
+    },
+    {
+      "type": "renderer",
+      "value": "dxvk"
+    },
+    {
+      "type": "retina",
+      "value": true,
+      "dpi": 96
+    },
+    {
+      "type": "env",
+      "name": "ROSETTA_ADVERTISE_AVX",
+      "value": "1",
+      "scope": "bottle"
+    },
+    {
+      "type": "file",
+      "path": "${gameDir}\\launcher-configuration.json",
+      "contents": "{\n    \"fallback\": \"DirectX 11\"\n}\n",
+      "ifMissing": false
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Rendering",
+      "key": "HairWorksLevel",
+      "value": "0"
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "Resolution",
+      "value": "\"2560x1600\""
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "FullScreenMode",
+      "value": "1"
+    },
+    {
+      "type": "ini",
+      "path": "%USERPROFILE%\\Documents\\The Witcher 3\\user.settings",
+      "section": "Viewport",
+      "key": "VSync",
+      "value": "false"
+    },
+    {
+      "type": "program",
+      "id": "witcher3",
+      "name": "The Witcher 3",
+      "exe": "${gameDir}\\bin\\x64\\witcher3.exe",
+      "args": [
+        "--launcher-skip",
+        "-skipStartScreen"
+      ],
+      "workingDir": "${gameDir}\\bin\\x64",
+      "env": {},
+      "launchMode": "direct"
+    },
+    {
+      "type": "note",
+      "text": "Saves live at <bottle>/prefix/drive_c/users/<you>/Documents/The Witcher 3/gamesaves."
+    },
+    {
+      "type": "note",
+      "text": "Keep HairWorks off (HairWorksLevel=0): it crashes under every Mac renderer."
+    },
+    {
+      "type": "note",
+      "text": "This is the DXVK leg of the benchmark matrix (CodeWeavers' CrossTie choice for the title, L-68), not the recipe to play with: DXVK on macOS makes sirens, rotfiends and hounds invisible (no transform feedback in MoltenVK). Re-apply witcher3-4.04-dx11 for DXMT, or run the matrix without switching recipes: `ossover bench run --renderer dxvk`."
+    },
+    {
+      "type": "note",
+      "text": "Never install the Steam client in this bottle; the depot was fetched with steamcmd and witcher3.exe runs DRM-free. A re-fetch without --allow-update is refused so Steam cannot move 4.04 to the DX12-only 5.x Remastered."
+    },
+    {
+      "type": "note",
+      "text": "The launcher-configuration.json fallback is rewritten every time this recipe runs; re-apply it after any fetch."
+    }
+  ],
+  "knownIssues": [
+    {
+      "symptom": "Sirens, rotfiends, hounds and some water effects are invisible",
+      "cause": "DXVK on macOS lacks D3D11 stream output (MoltenVK has no VK_EXT_transform_feedback)",
+      "fix": "Expected in this variant; it is here for the benchmark matrix only. Use witcher3-4.04-dx11 (renderer dxmt) to play."
+    },
+    {
+      "symptom": "Crash or hang when a character with HairWorks hair appears",
+      "cause": "NVIDIA HairWorks has no working path on Metal",
+      "fix": "Leave HairWorksLevel=0 in user.settings [Rendering]; the recipe sets it."
+    },
+    {
+      "symptom": "Game exits at once complaining about VCRUNTIME140.dll / MSVCP140.dll",
+      "cause": "A missing Visual C++ runtime in the prefix",
+      "fix": "Apply the separate recipe `ossover recipe apply witcher3-vcrun --bottle <bottle>` (winetricks vcrun2019 vcrun2013 vcrun2012; needs cabextract). It is not part of this recipe: Wine's builtin runtimes are the benchmark configuration and the ~100 MB download is only worth it on this abort."
+    },
+    {
+      "symptom": "Black screen after an update; bin/x64/witcher3.exe is gone",
+      "cause": "Steam moved the install to 5.x Remastered, which is DirectX 12 only",
+      "fix": "Fetch again with `ossover steam fetch --app 292030 --branch next-gen --allow-update` and re-apply this recipe."
+    },
+    {
+      "symptom": "Low or uneven frame rate with sync none or esync",
+      "cause": "Only msync (CrossOver-derived engines) avoids wineserver round trips for Mach semaphores",
+      "fix": "Use an engine with the msync capability; the recipe sets sync msync."
+    }
+  ]
+}

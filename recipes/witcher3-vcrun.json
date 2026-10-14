@@ -1,0 +1,35 @@
+{
+  "schema": "ossover.recipe/1",
+  "id": "witcher3-vcrun",
+  "title": "The Witcher 3: Visual C++ runtimes (only on a missing-VCRUNTIME abort)",
+  "description": "Companion to witcher3-4.04-dx11, applied by hand only when witcher3.exe aborts complaining about VCRUNTIME140.dll / MSVCP140.dll. Installs Microsoft's vcrun2019, vcrun2013 and vcrun2012 through the vendored winetricks (needs cabextract), which puts native vcruntime/msvcp overrides into the prefix; the benchmark configuration is Wine's builtins, so this is not part of the main recipe.",
+  "license": "CC0-1.0",
+  "status": "untested",
+  "requires": {
+    "capabilities": [],
+    "renderers": []
+  },
+  "steps": [
+    {
+      "type": "winetricks",
+      "verbs": [
+        "vcrun2019",
+        "vcrun2013",
+        "vcrun2012"
+      ],
+      "optional": false,
+      "note": "Only needed when the game aborts with a missing VCRUNTIME/MSVCP dll; Wine's builtin runtimes usually suffice."
+    },
+    {
+      "type": "note",
+      "text": "Native Visual C++ runtimes are now in the prefix (winetricks added their dll overrides to the registry). A benchmark run on this bottle no longer matches the plan's Wine-builtins configuration; note it in the results."
+    }
+  ],
+  "knownIssues": [
+    {
+      "symptom": "winetricks fails at once with 'cabextract not found'",
+      "cause": "The Microsoft redistributables are cab archives; winetricks needs cabextract to unpack them",
+      "fix": "brew install cabextract, then apply again."
+    }
+  ]
+}

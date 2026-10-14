@@ -1,0 +1,32 @@
+{
+  "schema": "ossover.engine-manifest/1",
+  "id": "test-engine",
+  "displayName": "Test engine (fixture: CrossOver-derived capabilities, never installed)",
+  "version": "r1",
+  "wineVersion": "11.16",
+  "arch": "x86_64",
+  "minMacOS": "15.0",
+  "requires": ["rosetta2"],
+  "source": {
+    "url": "https://example.invalid/test-engine.tar.xz",
+    "sha256": "TBD",
+    "license": "LGPL-2.1-or-later",
+    "extract": { "strip": 1, "into": "wine" }
+  },
+  "paths": {
+    "wine": "wine/bin/wine",
+    "wineserver": "wine/bin/wineserver",
+    "libWine": "wine/lib/wine"
+  },
+  "baseEnv": {},
+  "capabilities": {
+    "msync": true,
+    "esync": false,
+    "wow64": true,
+    "macdrvExports": true,
+    "dllPathPrepend": false,
+    "d3dmetalHost": true
+  },
+  "bundledRenderers": [],
+  "notes": ["Unit-test fixture: the capability set of a CrossOver-derived tree without WINEDLLPATH_PREPEND (renderer overlay strategy B)."]
+}

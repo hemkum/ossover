@@ -1,0 +1,71 @@
+{
+  "schema": "ossover.engine-manifest/1",
+  "id": "x64-frankea-wine11.16-cx26.3-v4.6.4b1",
+  "displayName": "frankea Whisky Libraries v4.6.4-beta.1 (Wine 11.16 + CrossOver 26.3 patches, DXMT 0.80)",
+  "version": "v4.6.4-beta.1",
+  "wineVersion": "11.16",
+  "wineVersionString": "wine-11.16",
+  "arch": "x86_64",
+  "minMacOS": "15.0",
+  "requires": ["rosetta2"],
+  "source": {
+    "url": "https://github.com/frankea/Whisky/releases/download/v4.6.4-beta.1/Libraries.tar.gz",
+    "sha256": "c8e6a10dfeb54fc16d3dd3382ee2e9d2cec3eb1f5641613cad8b07903818cb12",
+    "size": 481348675,
+    "license": "LGPL-2.1-or-later",
+    "extract": { "strip": 1, "into": "engine" }
+  },
+  "paths": {
+    "wine": "engine/Wine/bin/wine",
+    "wineserver": "engine/Wine/bin/wineserver",
+    "libWine": "engine/Wine/lib/wine"
+  },
+  "baseEnv": {},
+  "capabilities": {
+    "msync": true,
+    "esync": false,
+    "wow64": true,
+    "macdrvExports": true,
+    "dllPathPrepend": false,
+    "d3dmetalHost": true
+  },
+  "bundledRenderers": [
+    {
+      "kind": "dxmt",
+      "version": "0.80",
+      "path": "engine/DXMT",
+      "builtinMarked": false,
+      "layout": {
+        "unix": [],
+        "pe": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll", "nvapi64.dll", "nvngx.dll"],
+        "pe32": ["d3d10core.dll", "d3d11.dll", "dxgi.dll", "winemetal.dll"]
+      }
+    },
+    {
+      "kind": "dxvk",
+      "version": "1.10.3",
+      "path": "engine/DXVK",
+      "builtinMarked": false,
+      "layout": {
+        "unix": [],
+        "pe": ["d3d10core.dll", "d3d11.dll"],
+        "pe32": ["d3d10core.dll", "d3d11.dll"]
+      }
+    }
+  ],
+  "addons": { "wineMono": "11.3.0", "wineGecko": "2.47.4" },
+  "notes": [
+    "Bootstrap engine (plan §2): frankea's Whisky fork runtime, Wine 11.16 with the CrossOver 26.3 patch set, built via nix. Replaced by the ossover-built engine in Phase 4.",
+    "Layout confirmed 2026-10-13 with `tar tzf` on the 481,348,675-byte asset: Libraries/Wine/{bin,lib,share}, Libraries/DXMT/{x64,x32}, Libraries/DXVK/{x64,x32,dxvk.conf}, Libraries/WhiskyWineVersion.plist (version 4.6.4, dxmtVersion 0.80, dxvkVersion 1.10.3, gptkCapable true). strip 1 into engine/ gives engine/Wine/bin/wine.",
+    "Re-confirmed 2026-10-14 (REA store pass, `tar tzf`): Libraries/Wine/bin/{wine,wine64,wineloader,wineserver}; Libraries/Wine/lib/wine/x86_64-unix/{ntdll,winemac,winemetal}.so; x86_64-windows/winemetal.dll and i386-windows/winemetal.dll; Libraries/DXMT/x64/{d3d10core,d3d11,dxgi,winemetal,nvapi64,nvngx}.dll (no .so); Libraries/DXMT/x32/{d3d10core,d3d11,dxgi,winemetal}.dll; Libraries/DXVK/{x64,x32}/{d3d10core,d3d11}.dll + dxvk.conf; share/wine/mono/wine-mono-11.3.0 and share/wine/gecko/wine-gecko-2.47.4-{x86,x86_64} (recorded in addons; mono is newer than the 10.4.1 the ossover engine pins to match CrossOver, REA L-49). paths, strip and into are right as written.",
+    "engine/Wine/bin/{wine,wine64,wineloader} are relative symlinks to ../lib/wine/x86_64-unix/wine; wineserver is a real binary. lib/wine has x86_64-unix (31 .so), x86_64-windows, i386-windows (831 files); no i386-unix, so WoW64 only.",
+    "Capabilities confirmed on the extracted binaries: `nm -gU winemac.so | grep macdrv_functions` = 1 (macdrvExports); `strings ntdll.so | grep -c WINEDLLPATH_PREPEND` = 0 (no dllPathPrepend → renderer overlay strategy B); ntdll.so carries WINEMSYNC/WINEMSYNC_QLIMIT (msync) and CX_APPLEGPTK_LIBD3DSHARED_PATH (d3dmetalHost); it carries no WINEESYNC string at all, so esync is false (CrossOver trees replace esync with msync). EngineStore re-probes at install and overrides the manifest if these drift.",
+    "Re-probed 2026-10-14 on the extracted ntdll.so (661,968 B): WINEMSYNC ×3, WINEESYNC ×0, WINEDLLPATH_PREPEND ×0, CX_APPLEGPTK_LIBD3DSHARED_PATH ×1, CX_ACTIVE_GRAPHICS_BACKEND ×0 (its readers are in win32u, REA L-17/L-18); `strings ntdll.so | grep -m1 -E 'wine-[0-9]+\\.[0-9]+'` = wine-11.16 (wineVersionString; the REA L-45 method, no Wine executed); ntdll.so and winemetal.so are LC_BUILD_VERSION minos 15.0, matching minMacOS. So msync=true, esync=false (REA L-30, L-32; decision 4/21), dllPathPrepend=false, d3dmetalHost=true, macdrvExports=true (REA L-60/L-61) stand.",
+    "Bundled DXMT lives in engine/DXMT/{x64,x32} (Whisky's layout, not x86_64-windows/i386-windows): x64 has d3d10core, d3d11, dxgi, winemetal, nvapi64, nvngx; x32 has d3d10core, d3d11, dxgi, winemetal. Its d3d11/dxgi/d3d10core are NOT builtin-marked and differ from the dxmt-v0.80-builtin release asset (frankea's own build); winemetal.dll, nvapi64.dll and nvngx.dll are byte-identical to the 0.80 release.",
+    "EngineStore.install lays the bundle out as overlays/dxmt/{x86_64-windows ← x64, i386-windows ← x32} (CrossOver's lib/dxmt shape, REA L-23, L-65; decision 16(d)) and records layout/builtinMarked from the files; layout.unix stays empty because x64/ holds no .so. The same happens to DXVK (overlays/dxvk, dxvk.conf kept beside). The engine-bundled DXMT is the strategy-B pack RendererResolver prefers on this engine (decision 12(d)).",
+    "The DXMT Unix half ships inside Wine itself: engine/Wine/lib/wine/x86_64-unix/winemetal.so (32,071,792 B, differs from the 0.80 release's winemetal.so; rpaths @loader_path/ and @loader_path/../../, sane unlike CrossOver's malformed one, REA L-64) and a winemetal.dll in both x86_64-windows and i386-windows. Without WINEDLLPATH_PREPEND only strategy B applies: d3d11/dxgi/d3d10core are copied into the prefix (mark stripped, n,b) and run against this engine winemetal pair, which WINEDLLPATH can never shadow (REA L-20, L-24; decision 12, U-20); only a prepended root (strategy C) shadows winemetal too.",
+    "Bundled DXVK (engine/DXVK/{x64,x32}) holds only d3d10core.dll and d3d11.dll plus a dxvk.conf; no dxgi/d3d9. Not builtin-marked.",
+    "GStreamer plugins are at engine/Wine/lib/gstreamer-1.0 (Engine.gstreamerPlugins); every dylib, plugin and .so links through @loader_path/@rpath into engine/Wine/lib, so no DYLD_* variables are needed (baseEnv is empty). libMoltenVK.dylib is in engine/Wine/lib. Mach-O files are ad-hoc signed.",
+    "Upstream: https://github.com/frankea/Whisky (GPL-3.0 app; the runtime tarball is LGPL Wine + MIT DXMT + zlib DXVK + LGPL GStreamer/FFmpeg)."
+  ]
+}

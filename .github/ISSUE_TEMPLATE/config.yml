@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions, help and ideas
+    url: https://github.com/hemkum/ossover/discussions
+    about: Not sure it is a bug? Want to talk a recipe through before writing it? Start a discussion.
+  - name: Report a security vulnerability
+    url: https://github.com/hemkum/ossover/security/advisories/new
+    about: Private vulnerability reporting. SECURITY.md says what is in scope.

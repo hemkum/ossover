@@ -1,0 +1,134 @@
+name: Compatibility report
+description: How a game or launcher behaves in an ossover bottle (works / partial / broken). Reports feed the recipes' status and reports fields.
+title: "[compat] <game> - <verdict>"
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Facts over impressions. Frame rates only from `ossover bench` or the Metal HUD; a blank field is better than a guess.
+        One game per report. Never paste Steam credentials; check logs for your user name before attaching.
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      description: Title and version or branch.
+      placeholder: "The Witcher 3: Wild Hunt 4.04 (Steam next-gen branch)"
+    validations:
+      required: true
+  - type: dropdown
+    id: store
+    attributes:
+      label: Store / source
+      options:
+        - Steam
+        - GOG
+        - Epic Games Store
+        - itch.io
+        - Other DRM-free copy
+        - Other (say which in the notes)
+    validations:
+      required: true
+  - type: input
+    id: app-id
+    attributes:
+      label: App id
+      description: Steam app id, GOG product id, Epic catalog item id. Leave blank if there is none.
+      placeholder: "292030"
+  - type: input
+    id: recipe
+    attributes:
+      label: Recipe applied
+      description: "An id from `ossover recipe list`, or `none`."
+      placeholder: witcher3-4.04-dx11
+  - type: input
+    id: engine
+    attributes:
+      label: Engine id
+      description: "From `ossover engine list`."
+      placeholder: x64-frankea-wine11.16-cx26.3-v4.6.4b1
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      options:
+        - dxmt
+        - dxvk
+        - d3dmetal (your own imported GPTK)
+        - wined3d
+        - auto (say in the notes which one was picked)
+    validations:
+      required: true
+  - type: dropdown
+    id: sync
+    attributes:
+      label: Sync
+      options:
+        - msync
+        - esync
+        - none
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "26.7.1"
+    validations:
+      required: true
+  - type: input
+    id: chip
+    attributes:
+      label: Mac, chip and RAM
+      placeholder: "MacBook Pro, Apple M5 Pro, 24 GB"
+    validations:
+      required: true
+  - type: input
+    id: settings
+    attributes:
+      label: Resolution and in-game settings
+      placeholder: "2560x1600 borderless, High preset, HairWorks off"
+  - type: input
+    id: fps
+    attributes:
+      label: Frame rate (avg / 1% low)
+      description: "From `ossover bench` (median over runs) or the Metal HUD, with the scene and duration. Leave blank rather than estimate."
+      placeholder: "avg 0 / 1% low 0 over 60 s, Hierarch Square (Novigrad)"
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: Verdict
+      description: Same scale as a recipe's `status` field.
+      options:
+        - works - playable as far as I tested
+        - partial - runs with defects (say which below)
+        - broken - does not reach gameplay
+        - untested - I only got as far as described below
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: What works and what does not
+      description: Visual defects, crashes, audio, controllers, launcher quirks, workarounds you found, how long you played.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The relevant part of the bottle's `logs/` file, the `ossover run` output or the DXMT log.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: The game copy is my own; no cracked executables or redistributed game files were involved.
+          required: true
+        - label: Frame rates above are measured, not estimated (or left blank).
+          required: true
+        - label: Nothing above contains Steam credentials, tokens or other secrets.
+          required: true
